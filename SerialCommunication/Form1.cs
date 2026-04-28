@@ -242,6 +242,7 @@ namespace SerialCommunication
         private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
         {
             timerOefening3.Enabled = tabControl.SelectedIndex == 3;
+            timerOefening4.Enabled = tabControl.SelectedIndex == 4;
         }
 
         private void timerOefening3_Tick(object sender, EventArgs e)
@@ -269,6 +270,33 @@ namespace SerialCommunication
                 antwoord = antwoord.Trim();
                 antwoord = antwoord.Substring(4);
                 radioButtonDigital7.Checked = (antwoord == "1");
+            }
+            catch (Exception exception)
+            {
+                labelStatus.Text = "Error: " + exception.Message;
+                serialPortArduino.Close();
+                radioButtonVerbonden.Checked = false;
+                buttonConnect.Text = "Connect";
+            }
+        }
+
+        private void timerOefening4_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (serialPortArduino.IsOpen)
+                {
+                    serialPortArduino.ReadExisting();
+                    string commando = "get a0";
+                    serialPortArduino.WriteLine(commando);
+                    string antwoord = serialPortArduino.ReadLine();
+                    antwoord = antwoord.Trim();
+                    antwoord = antwoord.Substring(4);
+                    // labelAnalog0.Text = antwoord; //dit is om zonder de int variabele te werken
+
+                    int value = Int32.Parse(antwoord); // cijfers uit een string halen om mee te rekenen
+                    labelAnalog0.Text = value.ToString();
+                }
             }
             catch (Exception exception)
             {
