@@ -59,6 +59,11 @@ namespace SerialCommunication
                 if (serialPortArduino.IsOpen)
                 {
                     // ik heb een verbinding -> de gebruiker wil deze verbreken
+                    serialPortArduino.Close();
+                    radioButtonVerbonden.Checked = false;
+                    buttonConnect.Text = "Connect";
+                    labelStatus.Text = "Status: Disconnected";
+
                 }
                 else
                 {
@@ -77,12 +82,40 @@ namespace SerialCommunication
                     else if (radioButtonStopbitsOne.Checked) serialPortArduino.StopBits = StopBits.One;
                     else if (radioButtonStopbitsOnePointFive.Checked) serialPortArduino.StopBits = StopBits.OnePointFive;
                     else if (radioButtonStopbitsTwo.Checked) serialPortArduino.StopBits = StopBits.Two;
-                    
+
+                    if (radioButtonHandshakeNone.Checked) serialPortArduino.Handshake = Handshake.None;
+                    else if (radioButtonHandshakeRTS.Checked) serialPortArduino.Handshake = Handshake.RequestToSend;
+                    else if (radioButtonHandshakeRTSXonXoff.Checked) serialPortArduino.Handshake = Handshake.RequestToSendXOnXOff;
+                    else if (radioButtonHandshakeXonXoff.Checked) serialPortArduino.Handshake = Handshake.XOnXOff;
+
+                    serialPortArduino.RtsEnable = checkBoxRtsEnable.Checked;
+                    serialPortArduino.DtrEnable = checkBoxDtrEnable.Checked;
+
+                    serialPortArduino.Open();
+                    string commando = "ping";
+                    serialPortArduino.WriteLine(commando);
+                    string antwoord = serialPortArduino.ReadLine();
+                    antwoord = antwoord.TrimEnd();
+
+                    if (antwoord == "pong")
+                    {
+                        radioButtonVerbonden.Checked = true;
+                        buttonConnect.Text = "Disconnect";
+                        labelStatus.Text = "Status: Connected";
+                    }
+                    else 
+                    {
+                        serialPortArduino.Close();
+                        labelStatus.Text = "Error: verkeerd antwoord";
+                    }
                 }
             }
             catch (Exception exception )
             {
                 labelStatus.Text = "Error: " + exception.Message;
+                serialPortArduino.Close();
+                radioButtonVerbonden.Checked = false;
+                buttonConnect.Text = "Connect";
             }
         }
     }
